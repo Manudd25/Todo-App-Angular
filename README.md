@@ -19,7 +19,6 @@ You can try the live demo here: [TodoApp](https://todolistangular1.netlify.app/)
 ## Screenshots / Demo
 <img width="2940" height="1912" alt="Screenshot 2025-10-13 at 23 16 29" src="https://github.com/user-attachments/assets/910aca2f-4131-485c-b1f4-d41bb169235c" />
 
-https://todolistangular1.netlify.app/ 
 
 ---
 
@@ -28,5 +27,5 @@ https://todolistangular1.netlify.app/
 - **Framework**: Angular  
 - **TypeScript**  
 - **HTML / CSS / SCSS**  
-- (Optional) LocalStorage or backend API  
-- (Optional) Angular CLI, RxJS, etc.
+- LocalStorage (for now --- still in test). 
+- Angular CLI, RxJS, etc.
