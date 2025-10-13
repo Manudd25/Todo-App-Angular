@@ -5,23 +5,6 @@ You can try the live demo here: [TodoApp](https://todolistangular1.netlify.app/)
 
 ---
 
-## Table of Contents
-
-1. [Features](#features)  
-2. [Screenshots / Demo](#screenshots--demo)  
-3. [Technologies](#technologies)  
-4. [Installation](#installation)  
-5. [Usage](#usage)  
-6. [Folder Structure](#folder-structure)  
-7. [Configuration & Environment](#configuration--environment)  
-8. [Testing](#testing)  
-9. [Deployment](#deployment)  
-10. [Contributing](#contributing)  
-11. [License](#license)  
-12. [Contact](#contact)  
-
----
-
 ## Features
 
 - Add new todo items  
