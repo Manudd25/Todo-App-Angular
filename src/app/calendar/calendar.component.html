@@ -1,0 +1,243 @@
+<div class="calendar-layout">
+  <!-- Sidebar -->
+  <div class="sidebar" *ngIf="selectedDate">
+    <div class="sidebar-header">
+      <h3>{{ selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) }}</h3>
+      <p>{{ getTasksForDate(selectedDate).length }} tasks</p>
+    </div>
+
+    <!-- Task Input Section -->
+    <div class="task-input-section">
+      <h4>Add New Event</h4>
+      
+      <!-- Event Type Selector -->
+      <div class="event-type-selector">
+        <label class="event-type-label">Event Type:</label>
+        <div class="event-type-options">
+          <button 
+            *ngFor="let eventType of eventTypeKeys" 
+            class="event-type-btn"
+            [class.active]="selectedEventType === eventType"
+            (click)="selectedEventType = eventType"
+            [title]="eventTypes[eventType].name"
+          >
+            <mat-icon>{{ eventTypes[eventType].icon }}</mat-icon>
+            <span>{{ eventTypes[eventType].name }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <input 
+          type="text" 
+          [(ngModel)]="newTask" 
+          placeholder="Enter new event..."
+          (keyup.enter)="addTask()"
+          class="task-input"
+        >
+        <button (click)="addTask()" class="add-btn" [disabled]="!newTask.trim()">
+          <mat-icon>add</mat-icon>
+          Add
+        </button>
+      </div>
+      
+      <!-- Recurring Task Options -->
+      <div class="recurring-options">
+        <label class="checkbox-label">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="isRecurring"
+            class="checkbox-input"
+          >
+          <span class="checkbox-text">
+            <mat-icon>repeat</mat-icon>
+            Recurring task
+          </span>
+        </label>
+        
+        <div class="recurring-settings" *ngIf="isRecurring">
+          <label class="recurring-label">
+            Every 
+            <input 
+              type="number" 
+              [(ngModel)]="recurringDays" 
+              min="1" 
+              max="365"
+              class="recurring-input"
+            >
+            days
+          </label>
+          <div class="quick-presets">
+            <button 
+              *ngFor="let preset of [1, 3, 7, 14, 30]"
+              (click)="recurringDays = preset"
+              class="preset-btn"
+              [class.active]="recurringDays === preset"
+            >
+              {{ preset }}d
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tasks List -->
+    <div class="tasks-list">
+      <h4>Tasks for this day</h4>
+      <div class="tasks-container">
+        <div 
+          *ngFor="let task of getTasksForDate(selectedDate); let i = index" 
+          class="task-item"
+          [class.completed]="task.completed"
+          [class.dragging]="draggedTask?.id === task.id"
+          draggable="true"
+          (dragstart)="onTaskDragStart($event, task)"
+          (dragend)="onTaskDragEnd($event)"
+        >
+            <div class="task-content">
+              <div class="task-checkbox">
+                <input 
+                  type="checkbox" 
+                  [checked]="task.completed"
+                  (change)="toggleTask(task)"
+                  class="checkbox-input"
+                  [id]="'task-' + i"
+                >
+                <label [for]="'task-' + i" class="checkbox-label"></label>
+              </div>
+              <div class="task-icon">
+                <mat-icon [style.color]="getEventTypeColor(task.eventType)">{{ getEventTypeIcon(task.eventType) }}</mat-icon>
+              </div>
+              <div class="task-color" [style.background-color]="task.color"></div>
+            
+            <!-- Edit Mode -->
+            <div *ngIf="isEditing(task)" class="edit-mode">
+              <input 
+                type="text" 
+                [(ngModel)]="editTaskText"
+                (keyup.enter)="saveEdit()"
+                (keyup.escape)="cancelEdit()"
+                class="edit-input"
+                #editInput
+                (focus)="editInput.select()"
+              >
+              <div class="edit-actions">
+                <button class="save-btn" (click)="saveEdit()" title="Save">
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button class="cancel-btn" (click)="cancelEdit()" title="Cancel">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Display Mode -->
+            <span 
+              *ngIf="!isEditing(task)"
+              class="task-text" 
+              [class.completed]="task.completed"
+              [title]="task.isRecurring ? 'Recurring task - every ' + task.recurringDays + ' days' : ''"
+            >
+              {{ task.text }}
+            </span>
+            <div class="task-actions">
+              <button 
+                class="edit-btn" 
+                (click)="editTask(task)"
+                (click)="$event.stopPropagation()"
+                title="Edit task"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <span *ngIf="task.isRecurring" class="recurring-icon" title="Recurring task">
+                <mat-icon>repeat</mat-icon>
+              </span>
+              <button 
+                class="delete-btn" 
+                (click)="deleteTask(task.id)"
+                (click)="$event.stopPropagation()"
+                title="Delete task"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div *ngIf="getTasksForDate(selectedDate).length === 0" class="no-tasks">
+          <p>No tasks for this day</p>
+          <small>Click "Add" to create your first task!</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <h4>💡 Tips</h4>
+      <ul>
+        <li>Drag tasks between dates to reschedule</li>
+        <li>Click tasks to mark as complete</li>
+        <li>Use recurring tasks for regular activities</li>
+        <li>Look for <mat-icon>repeat</mat-icon> icon for recurring tasks</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Calendar Section -->
+  <div class="calendar-section">
+    <!-- Header -->
+    <div class="calendar-header">
+      <div class="month-navigation">
+        <button class="nav-btn" (click)="previousMonth()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <h2>{{ months[currentMonth] }} {{ currentYear }}</h2>
+        <button class="nav-btn" (click)="nextMonth()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      <button class="today-btn" (click)="goToToday()">Today</button>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-grid">
+      <!-- Week days header -->
+      <div class="week-header">
+        <div *ngFor="let day of weekDays" class="week-day">{{ day }}</div>
+      </div>
+      
+      <!-- Calendar days -->
+      <div class="calendar-days">
+        <div 
+          *ngFor="let date of daysInMonth; let i = index" 
+          class="calendar-day"
+          [class.today]="isToday(date)"
+          [class.other-month]="!isCurrentMonth(date)"
+          [class.selected]="isSelectedDate(date)"
+          [class.drag-over]="false"
+          (click)="selectDate(date)"
+          (dragover)="onDateDragOver($event)"
+          (drop)="onDateDrop($event, date)"
+          (dragenter)="onDateDragEnter($event)"
+          (dragleave)="onDateDragLeave($event)"
+        >
+          <div class="day-number">{{ date.getDate() }}</div>
+          <div class="task-indicators">
+            <span 
+              *ngFor="let task of getTasksForDate(date).slice(0, 3)" 
+              class="task-dot"
+              [style.background-color]="task.color"
+              [title]="task.text"
+            ></span>
+            <span 
+              *ngIf="getTasksForDate(date).length > 3" 
+              class="more-tasks"
+            >
+              +{{ getTasksForDate(date).length - 3 }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

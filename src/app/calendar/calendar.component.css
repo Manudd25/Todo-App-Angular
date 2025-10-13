@@ -1,0 +1,814 @@
+.calendar-layout {
+  display: flex;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Arial', sans-serif;
+  min-height: calc(100vh - 100px);
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.calendar-section {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  width: 700px;
+  flex-shrink: 0;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 1;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.month-navigation h2 {
+  color: white;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.today-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.today-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.calendar-grid {
+  padding: 20px;
+}
+
+.week-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.week-day {
+  text-align: center;
+  font-weight: 600;
+  color: #666;
+  padding: 10px 5px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-day {
+  min-height: 80px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.calendar-day:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-day.today {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: bold;
+}
+
+.calendar-day.other-month {
+  background: #f5f5f5;
+  color: #ccc;
+}
+
+.calendar-day.selected {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  font-weight: bold;
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+.calendar-day.drag-over {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+}
+
+.day-number {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.task-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  align-items: center;
+}
+
+.task-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.more-tasks {
+  font-size: 10px;
+  color: #666;
+  font-weight: 500;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 3px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: 350px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  order: -1; /* This puts the sidebar on the left */
+}
+
+.sidebar-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.sidebar-header h3 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sidebar-header p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.task-input-section {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.task-input-section h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.event-type-selector {
+  margin-bottom: 15px;
+}
+
+.event-type-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.event-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.event-type-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.event-type-btn:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+  transform: translateY(-1px);
+}
+
+.event-type-btn.active {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.event-type-btn mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.event-type-btn span {
+  flex: 1;
+  text-align: left;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.task-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.task-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.add-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.add-btn mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.add-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.recurring-options {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.checkbox-input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.checkbox-text {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.checkbox-text mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+}
+
+.recurring-settings {
+  margin-top: 10px;
+}
+
+.recurring-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.recurring-input {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.quick-presets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.preset-btn {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.preset-btn:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+}
+
+.preset-btn.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.tasks-list {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.tasks-list h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-item {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: grab;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden; /* Prevent content from overflowing */
+}
+
+.task-item:hover {
+  background: #e9ecef;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.task-item.dragging {
+  opacity: 0.5;
+  transform: rotate(2deg) scale(1.02);
+  z-index: 1000;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.task-item.completed {
+  opacity: 0.6;
+  background: #e8f5e8;
+}
+
+.task-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* Allows flex items to shrink below their content size */
+  width: 100%; /* Ensure full width usage */
+}
+
+.task-checkbox {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-checkbox .checkbox-input {
+  opacity: 0;
+  position: absolute;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.task-checkbox .checkbox-label {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  margin: 0;
+}
+
+.task-checkbox .checkbox-label:hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.task-checkbox .checkbox-input:checked + .checkbox-label {
+  background: #667eea;
+  border-color: #667eea;
+}
+
+.task-checkbox .checkbox-input:checked + .checkbox-label::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.task-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.task-icon mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+}
+
+.task-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.task-text {
+  flex: 1;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+  min-width: 0; /* Allows text to truncate */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  min-height: 18px; /* Match checkbox height */
+}
+
+.task-text.completed {
+  text-decoration: line-through;
+  color: #666;
+}
+
+.edit-mode {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* Allow shrinking */
+  max-width: calc(100% - 60px); /* Reserve space for action buttons */
+}
+
+.edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.edit-actions mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+}
+
+.edit-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 2px solid #667eea;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  min-width: 0; /* Allow input to shrink */
+  max-width: 100%; /* Don't exceed container */
+}
+
+.edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.save-btn,
+.cancel-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.save-btn {
+  color: #28a745;
+}
+
+.save-btn:hover {
+  background: #d4edda;
+  transform: scale(1.1);
+}
+
+.cancel-btn {
+  color: #dc3545;
+}
+
+.cancel-btn:hover {
+  background: #f8d7da;
+  transform: scale(1.1);
+}
+
+.task-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0; /* Prevents actions from shrinking */
+  margin-left: auto; /* Push to the right */
+}
+
+.task-actions mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+}
+
+.recurring-icon mat-icon {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+  line-height: 1;
+}
+
+.edit-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.edit-btn:hover {
+  background: #f0f4ff;
+  transform: scale(1.1);
+}
+
+.recurring-icon {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.delete-btn:hover {
+  background: #f8d7da;
+  transform: scale(1.1);
+}
+
+.no-tasks {
+  text-align: center;
+  padding: 30px 20px;
+  color: #666;
+}
+
+.no-tasks p {
+  margin: 0 0 5px 0;
+  font-weight: 500;
+}
+
+.no-tasks small {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.tips-section {
+  padding: 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.tips-section h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tips-section ul {
+  margin: 0;
+  padding-left: 15px;
+  color: #666;
+}
+
+.tips-section li {
+  margin-bottom: 5px;
+  font-size: 12px;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tips-section li mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  color: #667eea;
+}
+
+/* Responsive design */
+@media (max-width: 1024px) {
+  .calendar-layout {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .sidebar {
+    width: 100%;
+    max-width: 500px;
+    order: 0;
+  }
+  
+  .calendar-section {
+    width: 100%;
+    max-width: 700px;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-layout {
+    padding: 10px;
+  }
+  
+  .calendar-day {
+    min-height: 60px;
+    padding: 6px;
+  }
+  
+  .day-number {
+    font-size: 12px;
+  }
+  
+  .task-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .more-tasks {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+  
+  .sidebar {
+    width: 100%;
+  }
+  
+  .input-group {
+    flex-direction: column;
+  }
+  
+  .add-btn {
+    width: 100%;
+  }
+}
