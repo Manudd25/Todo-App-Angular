@@ -99,9 +99,16 @@ export class NavbarComponent implements OnInit {
         task.date.toDateString() === todayString && !task.completed
       );
       
-      const overdue = tasks.filter((task: any) => 
-        task.date < today && !task.completed
-      );
+      const overdue = tasks.filter((task: any) => {
+        const taskDate = new Date(task.date);
+        const todayStart = new Date(today);
+        todayStart.setHours(0, 0, 0, 0);
+        
+        // Only consider tasks as overdue if they were actually due before today
+        // and are not future recurring tasks
+        return taskDate < todayStart && !task.completed && 
+               (!task.isRecurring || task.originalDate);
+      });
       
       // Group tasks by text to handle recurring tasks
       const uniqueDueToday = this.getUniqueTasks(dueToday);

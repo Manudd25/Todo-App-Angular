@@ -135,7 +135,31 @@ export class CalendarComponent implements OnInit {
   }
 
   deleteTask(taskId: string) {
-    this.tasks = this.tasks.filter(task => task.id !== taskId);
+    const task = this.tasks.find(t => t.id === taskId);
+    
+    if (task && task.isRecurring) {
+      // Show confirmation dialog for recurring tasks
+      const confirmDelete = confirm(
+        `This is a recurring task. Do you want to:\n\n` +
+        `• Click OK to delete ALL future occurrences\n` +
+        `• Click Cancel to delete only today's occurrence`
+      );
+      
+      if (confirmDelete) {
+        // Delete all future occurrences of this recurring task
+        this.tasks = this.tasks.filter(t => 
+          !(t.isRecurring && t.text === task.text && t.originalDate && 
+            t.originalDate.getTime() === task.originalDate!.getTime())
+        );
+      } else {
+        // Delete only this specific occurrence
+        this.tasks = this.tasks.filter(t => t.id !== taskId);
+      }
+    } else {
+      // Regular task - delete normally
+      this.tasks = this.tasks.filter(t => t.id !== taskId);
+    }
+    
     this.saveTasks();
   }
 
