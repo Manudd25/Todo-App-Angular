@@ -27,5 +27,5 @@ You can try the live demo here: [TodoApp](https://todolistangular1.netlify.app/)
 - **Framework**: Angular  
 - **TypeScript**  
 - **HTML / CSS / SCSS**  
-- LocalStorage (for now --- still in test). 
-- Angular CLI, RxJS, etc.
+- Database: SQLite. 
+

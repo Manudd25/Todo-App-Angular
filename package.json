@@ -1,41 +1,30 @@
 {
-  "name": "todo-app",
-  "version": "0.0.0",
+  "name": "todo-calendar-app",
+  "version": "1.0.0",
+  "description": "Full-stack Todo Calendar application with Angular frontend and Node.js backend",
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
-  },
-  "private": true,
-  "dependencies": {
-    "@angular/animations": "^19.2.15",
-    "@angular/cdk": "^19.2.19",
-    "@angular/common": "^19.2.0",
-    "@angular/compiler": "^19.2.0",
-    "@angular/core": "^19.2.0",
-    "@angular/forms": "^19.2.0",
-    "@angular/material": "^19.2.19",
-    "@angular/platform-browser": "^19.2.0",
-    "@angular/platform-browser-dynamic": "^19.2.0",
-    "@angular/router": "^19.2.0",
-    "lucide-angular": "^0.545.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm start",
+    "frontend:dev": "cd frontend && ng serve",
+    "frontend:build": "cd frontend && ng build",
+    "frontend:build:prod": "cd frontend && ng build --configuration production",
+    "start": "npm run backend:start",
+    "build": "npm run frontend:build",
+    "build:prod": "npm run frontend:build:prod"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^19.2.0",
-    "@angular/cli": "^19.2.0",
-    "@angular/compiler-cli": "^19.2.0",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.6.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.7.2"
-  }
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "angular",
+    "nodejs",
+    "sqlite",
+    "todo",
+    "calendar",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
