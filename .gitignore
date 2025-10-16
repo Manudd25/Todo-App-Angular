@@ -117,3 +117,8 @@ Thumbs.db
 # Test files (we cleaned these up)
 *test*.js
 *debug*.js
+
+# Deployment files
+*.zip
+backend-deployment.zip
+frontend-deployment.zip
