@@ -1,6 +1,7 @@
 [build]
+  base = "frontend"
   publish = "dist/todo-app/browser"
-  command = "cd frontend && npm install && ng build --configuration production"
+  command = "npm install && ng build --configuration production"
 
 [build.environment]
   NODE_VERSION = "18"
