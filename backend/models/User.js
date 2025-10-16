@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import db from '../config/database.js';
+import { db } from '../config/database.js';
 
 export class User {
   static async create(userData) {
@@ -40,7 +40,7 @@ export class User {
         if (err) {
           reject(err);
         } else {
-          resolve(row);
+          resolve(row || null);
         }
       });
     });
@@ -52,7 +52,7 @@ export class User {
         if (err) {
           reject(err);
         } else {
-          resolve(row);
+          resolve(row || null);
         }
       });
     });

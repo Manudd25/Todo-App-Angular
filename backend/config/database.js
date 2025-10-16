@@ -56,5 +56,18 @@ export const initializeDatabase = () => {
   });
 };
 
+export const closeDatabase = () => {
+  return new Promise((resolve, reject) => {
+    db.close((err) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log('✅ Database connection closed');
+        resolve();
+      }
+    });
+  });
+};
+
 export { db };
 export default db;

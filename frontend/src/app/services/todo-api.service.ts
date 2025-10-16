@@ -2,73 +2,49 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Task } from '../calendar/calendar.component';
-import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TodoApiService {
-  private apiUrl = 'https://todolist-angular-a7f8acezg7dgd8gk.westeurope-01.azurewebsites.net/api';
+  private apiUrl = 'http://localhost:3003/api';
 
-  constructor(private http: HttpClient, private authService: AuthService) { }
+  constructor(private http: HttpClient) { }
 
   // Get all tasks
   getAllTasks(): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/tasks`, { headers: this.authService.getAuthHeaders() });
+    return this.http.get<Task[]>(`${this.apiUrl}/tasks`);
   }
 
   // Get tasks for a specific date
   getTasksForDate(date: Date): Observable<Task[]> {
     const dateString = date.toISOString().split('T')[0];
-    return this.http.get<Task[]>(`${this.apiUrl}/tasks/date/${dateString}`, { headers: this.authService.getAuthHeaders() });
+    return this.http.get<Task[]>(`${this.apiUrl}/tasks/date/${dateString}`);
   }
 
   // Get tasks by event type
   getTasksByEventType(eventType: string): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/tasks?eventType=${eventType}`, { headers: this.authService.getAuthHeaders() });
+    return this.http.get<Task[]>(`${this.apiUrl}/tasks?eventType=${eventType}`);
   }
 
   // Create a new task
-  createTask(task: Task): Observable<any> {
-    return this.http.post(`${this.apiUrl}/tasks`, {
-      id: task.id,
-      text: task.text,
-      completed: task.completed,
-      date: task.date.toISOString(),
-      color: task.color,
-      isRecurring: task.isRecurring,
-      recurringDays: task.recurringDays,
-      originalDate: task.originalDate?.toISOString(),
-      eventType: task.eventType
-    }, { headers: this.authService.getAuthHeaders() });
+  createTask(task: Task): Observable<Task> {
+    return this.http.post<Task>(`${this.apiUrl}/tasks`, task);
   }
 
   // Update a task
-  updateTask(task: Task): Observable<any> {
-    return this.http.put(`${this.apiUrl}/tasks/${task.id}`, {
-      text: task.text,
-      completed: task.completed,
-      date: task.date.toISOString(),
-      color: task.color,
-      isRecurring: task.isRecurring,
-      recurringDays: task.recurringDays,
-      originalDate: task.originalDate?.toISOString(),
-      eventType: task.eventType
-    }, { headers: this.authService.getAuthHeaders() });
+  updateTask(task: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.apiUrl}/tasks/${task.id}`, task);
   }
 
   // Delete a task
-  deleteTask(taskId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/tasks/${taskId}`, { headers: this.authService.getAuthHeaders() });
+  deleteTask(taskId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/tasks/${taskId}`);
   }
 
   // Delete all recurring tasks
-  deleteRecurringTasks(text: string, originalDate: Date): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/tasks/recurring/${encodeURIComponent(text)}/${originalDate.toISOString()}`, { headers: this.authService.getAuthHeaders() });
-  }
-
-  // Health check
-  healthCheck(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/health`);
+  deleteRecurringTasks(text: string, originalDate: Date): Observable<void> {
+    const originalDateString = originalDate.toISOString().split('T')[0];
+    return this.http.delete<void>(`${this.apiUrl}/tasks/recurring/${text}/${originalDateString}`);
   }
 }

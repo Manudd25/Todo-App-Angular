@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService, User } from '../services/auth.service';
+import { TodoApiService } from '../services/todo-api.service';
 
 export interface Notification {
   id: string;
@@ -24,22 +24,10 @@ export class NavbarComponent implements OnInit {
   showNotifications = false;
   notifications: Notification[] = [];
   unreadCount = 0;
-  isAuthenticated = false;
-  currentUser: User | null = null;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private router: Router, private todoApiService: TodoApiService) {}
 
   ngOnInit() {
-    // Check authentication status
-    this.isAuthenticated = this.authService.isAuthenticated();
-    this.currentUser = this.authService.getCurrentUser();
-    
-    // Subscribe to auth state changes
-    this.authService.currentUser$.subscribe(user => {
-      this.isAuthenticated = !!user;
-      this.currentUser = user;
-    });
-
     this.loadNotifications();
     this.clearOldNotifications();
     this.checkForDueTasks();
@@ -56,15 +44,6 @@ export class NavbarComponent implements OnInit {
         this.showNotifications = false;
       }
     });
-  }
-
-  signOut() {
-    this.authService.signOut();
-    this.router.navigate(['/']);
-  }
-
-  goToCalendar() {
-    this.router.navigate(['/calendar']);
   }
 
   toggleNotifications() {
@@ -112,72 +91,71 @@ export class NavbarComponent implements OnInit {
     const today = new Date();
     const todayString = today.toDateString();
     
-    // Get tasks from localStorage
-    const savedTasks = localStorage.getItem('calendar-tasks');
-    if (savedTasks) {
-      const tasks = JSON.parse(savedTasks).map((task: any) => ({
-        ...task,
-        date: new Date(task.date)
-      }));
-      
-      const dueToday = tasks.filter((task: any) => 
-        task.date.toDateString() === todayString && !task.completed
-      );
-      
-      const overdue = tasks.filter((task: any) => {
-        const taskDate = new Date(task.date);
-        const todayStart = new Date(today);
-        todayStart.setHours(0, 0, 0, 0);
-        
-        // Only consider tasks as overdue if they were actually due before today
-        // and are not future recurring tasks
-        return taskDate < todayStart && !task.completed && 
-               (!task.isRecurring || task.originalDate);
-      });
-      
-      // Group tasks by text to handle recurring tasks
-      const uniqueDueToday = this.getUniqueTasks(dueToday);
-      const uniqueOverdue = this.getUniqueTasks(overdue);
-      
-      // Create notifications for due today tasks
-      uniqueDueToday.forEach((task: any) => {
-        const existingNotification = this.notifications.find(n => 
-          n.task === task.text && n.date.toDateString() === todayString && n.type === 'due_today'
+    // Get tasks from API
+    this.todoApiService.getAllTasks().subscribe({
+      next: (tasks) => {
+        const dueToday = tasks.filter((task: any) => 
+          new Date(task.date).toDateString() === todayString && !task.completed
         );
         
-        if (!existingNotification) {
-          const notification: Notification = {
-            id: `due-${task.text}-${todayString}`,
-            task: task.text,
-            date: task.date,
-            isRead: false,
-            type: 'due_today'
-          };
-          this.notifications.unshift(notification);
-        }
-      });
-      
-      // Create notifications for overdue tasks
-      uniqueOverdue.forEach((task: any) => {
-        const existingNotification = this.notifications.find(n => 
-          n.task === task.text && n.type === 'overdue'
-        );
+        const overdue = tasks.filter((task: any) => {
+          const taskDate = new Date(task.date);
+          const todayStart = new Date(today);
+          todayStart.setHours(0, 0, 0, 0);
+          
+          // Only consider tasks as overdue if they were actually due before today
+          // and are not future recurring tasks
+          return taskDate < todayStart && !task.completed && 
+                 (!task.isRecurring || task.originalDate);
+        });
         
-        if (!existingNotification) {
-          const notification: Notification = {
-            id: `overdue-${task.text}`,
-            task: task.text,
-            date: task.date,
-            isRead: false,
-            type: 'overdue'
-          };
-          this.notifications.unshift(notification);
-        }
-      });
-      
-      this.unreadCount = this.notifications.filter(n => !n.isRead).length;
-      this.saveNotifications();
-    }
+        // Group tasks by text to handle recurring tasks
+        const uniqueDueToday = this.getUniqueTasks(dueToday);
+        const uniqueOverdue = this.getUniqueTasks(overdue);
+        
+        // Create notifications for due today tasks
+        uniqueDueToday.forEach((task: any) => {
+          const existingNotification = this.notifications.find(n => 
+            n.task === task.text && new Date(task.date).toDateString() === todayString && n.type === 'due_today'
+          );
+          
+          if (!existingNotification) {
+            const notification: Notification = {
+              id: `due-${task.text}-${todayString}`,
+              task: task.text,
+              date: new Date(task.date),
+              isRead: false,
+              type: 'due_today'
+            };
+            this.notifications.unshift(notification);
+          }
+        });
+        
+        // Create notifications for overdue tasks
+        uniqueOverdue.forEach((task: any) => {
+          const existingNotification = this.notifications.find(n => 
+            n.task === task.text && n.type === 'overdue'
+          );
+          
+          if (!existingNotification) {
+            const notification: Notification = {
+              id: `overdue-${task.text}`,
+              task: task.text,
+              date: new Date(task.date),
+              isRead: false,
+              type: 'overdue'
+            };
+            this.notifications.unshift(notification);
+          }
+        });
+        
+        this.unreadCount = this.notifications.filter(n => !n.isRead).length;
+        this.saveNotifications();
+      },
+      error: (error) => {
+        console.error('Error loading tasks for notifications:', error);
+      }
+    });
   }
 
   getUniqueTasks(tasks: any[]): any[] {

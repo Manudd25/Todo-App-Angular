@@ -1,4 +1,4 @@
-import db from '../config/database.js';
+import { db } from '../config/database.js';
 
 export class Task {
   static async create(taskData) {
@@ -12,7 +12,7 @@ export class Task {
           if (err) {
             reject(err);
           } else {
-            resolve({ id: this.lastID, message: 'Task created successfully' });
+            resolve({ id, message: 'Task created successfully' });
           }
         }
       );
@@ -21,27 +21,26 @@ export class Task {
 
   static async findByUserId(userId, filters = {}) {
     const { date, eventType } = filters;
-    let query = 'SELECT * FROM tasks WHERE userId = ?';
+    let queryText = 'SELECT * FROM tasks WHERE userId = ?';
     const params = [userId];
 
     if (date) {
-      query += ' AND date = ?';
+      queryText += ' AND date = ?';
       params.push(date);
     }
 
     if (eventType) {
-      query += ' AND eventType = ?';
+      queryText += ' AND eventType = ?';
       params.push(eventType);
     }
 
-    query += ' ORDER BY date ASC, createdAt ASC';
+    queryText += ' ORDER BY date ASC, createdAt ASC';
 
     return new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
+      db.all(queryText, params, (err, rows) => {
         if (err) {
           reject(err);
         } else {
-          // Convert date strings back to Date objects
           const tasks = rows.map(row => ({
             ...row,
             date: new Date(row.date),
@@ -100,15 +99,19 @@ export class Task {
 
   static async delete(id, userId) {
     return new Promise((resolve, reject) => {
-      db.run('DELETE FROM tasks WHERE id = ? AND userId = ?', [id, userId], function(err) {
-        if (err) {
-          reject(err);
-        } else if (this.changes === 0) {
-          reject(new Error('Task not found'));
-        } else {
-          resolve({ message: 'Task deleted successfully' });
+      db.run(
+        'DELETE FROM tasks WHERE id = ? AND userId = ?',
+        [id, userId],
+        function(err) {
+          if (err) {
+            reject(err);
+          } else if (this.changes === 0) {
+            reject(new Error('Task not found'));
+          } else {
+            resolve({ message: 'Task deleted successfully' });
+          }
         }
-      });
+      );
     });
   }
 

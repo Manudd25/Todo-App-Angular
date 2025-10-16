@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { TodoApiService } from '../services/todo-api.service';
-import { AuthService } from '../services/auth.service';
 
 export interface Task {
   id: string;
@@ -48,8 +47,7 @@ export class CalendarComponent implements OnInit {
   selectedEventType: 'task' | 'birthday' | 'vacation' | 'timeoff' | 'family' | 'date' | 'social' | 'holiday' = 'task';
 
   constructor(
-    private todoApiService: TodoApiService,
-    private authService: AuthService
+    private todoApiService: TodoApiService
   ) {}
   
   // Event types with colors and icons
@@ -71,19 +69,9 @@ export class CalendarComponent implements OnInit {
   ];
 
   ngOnInit() {
-    // Check if user is authenticated
-    if (!this.authService.isAuthenticated()) {
-      console.warn('User not authenticated, redirecting to login');
-      return;
-    }
-    
     this.generateCalendar();
     this.loadTasks();
     this.generateMissingRecurringTasks();
-  }
-
-  isUserAuthenticated(): boolean {
-    return this.authService.isAuthenticated();
   }
 
   generateCalendar() {
@@ -107,11 +95,6 @@ export class CalendarComponent implements OnInit {
   }
 
   addTask() {
-    if (!this.isUserAuthenticated()) {
-      console.warn('User must be logged in to add tasks');
-      return;
-    }
-    
     if (this.newTask.trim() && this.selectedDate) {
       const eventTypeConfig = this.eventTypes[this.selectedEventType];
       const task: Task = {
@@ -135,21 +118,25 @@ export class CalendarComponent implements OnInit {
 
       // Save to API
       this.todoApiService.createTask(task).subscribe({
-        next: () => {
-          console.log('Task saved to database');
+        next: (createdTask) => {
+          // Update local array with the created task
+          const index = this.tasks.findIndex(t => t.id === task.id);
+          if (index !== -1) {
+            this.tasks[index] = createdTask;
+          }
+          
+          this.newTask = '';
+          this.isRecurring = false;
+          this.recurringDays = 14;
+          this.selectedEventType = 'task';
+          
+          // Trigger notification check
+          this.triggerNotificationCheck();
         },
         error: (error) => {
-          console.error('Error saving task to database:', error);
-          // Keep the task in localStorage as backup
-          this.saveTasks();
+          console.error('Error creating task:', error);
         }
       });
-      
-      this.newTask = '';
-      this.isRecurring = false;
-      this.recurringDays = 14;
-      this.selectedEventType = 'task';
-      this.saveTasks(); // Keep localStorage as backup
       
       // Trigger notification check
       this.triggerNotificationCheck();
@@ -157,11 +144,6 @@ export class CalendarComponent implements OnInit {
   }
 
   toggleTask(task: Task) {
-    if (!this.isUserAuthenticated()) {
-      console.warn('User must be logged in to toggle tasks');
-      return;
-    }
-    
     task.completed = !task.completed;
     
     // If it's a recurring task and was just completed, create the next occurrence
@@ -169,18 +151,20 @@ export class CalendarComponent implements OnInit {
       this.createNextRecurringTask(task);
     }
     
-    this.saveTasks();
-    
-    // Trigger notification check
-    this.triggerNotificationCheck();
+    this.todoApiService.updateTask(task).subscribe({
+      next: () => {
+        // Trigger notification check
+        this.triggerNotificationCheck();
+      },
+      error: (error) => {
+        console.error('Error updating task:', error);
+        // Revert the change on error
+        task.completed = !task.completed;
+      }
+    });
   }
 
   deleteTask(taskId: string) {
-    if (!this.isUserAuthenticated()) {
-      console.warn('User must be logged in to delete tasks');
-      return;
-    }
-    
     const task = this.tasks.find(t => t.id === taskId);
     
     if (task && task.isRecurring) {
@@ -193,42 +177,61 @@ export class CalendarComponent implements OnInit {
       
       if (confirmDelete) {
         // Delete all future occurrences of this recurring task
-        this.tasks = this.tasks.filter(t => 
-          !(t.isRecurring && t.text === task.text && t.originalDate && 
-            t.originalDate.getTime() === task.originalDate!.getTime())
-        );
+        this.todoApiService.deleteRecurringTasks(task.text, task.originalDate!).subscribe({
+          next: () => {
+            this.tasks = this.tasks.filter(t => 
+              !(t.isRecurring && t.text === task.text && t.originalDate && 
+                t.originalDate.getTime() === task.originalDate!.getTime())
+            );
+          },
+          error: (error) => {
+            console.error('Error deleting recurring tasks:', error);
+          }
+        });
       } else {
         // Delete only this specific occurrence
-        this.tasks = this.tasks.filter(t => t.id !== taskId);
+        this.todoApiService.deleteTask(taskId).subscribe({
+          next: () => {
+            this.tasks = this.tasks.filter(t => t.id !== taskId);
+          },
+          error: (error) => {
+            console.error('Error deleting task:', error);
+          }
+        });
       }
     } else {
       // Regular task - delete normally
-      this.tasks = this.tasks.filter(t => t.id !== taskId);
+      this.todoApiService.deleteTask(taskId).subscribe({
+        next: () => {
+          this.tasks = this.tasks.filter(t => t.id !== taskId);
+        },
+        error: (error) => {
+          console.error('Error deleting task:', error);
+        }
+      });
     }
-    
-    this.saveTasks();
   }
 
   editTask(task: Task) {
-    if (!this.isUserAuthenticated()) {
-      console.warn('User must be logged in to edit tasks');
-      return;
-    }
     
     this.editingTask = task;
     this.editTaskText = task.text;
   }
 
   saveEdit() {
-    if (!this.isUserAuthenticated()) {
-      console.warn('User must be logged in to save task edits');
-      return;
-    }
-    
     if (this.editingTask && this.editTaskText.trim()) {
       this.editingTask.text = this.editTaskText.trim();
-      this.saveTasks();
-      this.cancelEdit();
+      
+      this.todoApiService.updateTask(this.editingTask).subscribe({
+        next: () => {
+          this.cancelEdit();
+        },
+        error: (error) => {
+          console.error('Error updating task:', error);
+          // Revert the change on error
+          this.editingTask!.text = this.editTaskText;
+        }
+      });
     }
   }
 
@@ -323,7 +326,6 @@ export class CalendarComponent implements OnInit {
     
     if (this.draggedTask) {
       this.draggedTask.date = new Date(targetDate);
-      this.saveTasks();
       this.draggedTask = null;
     }
   }
@@ -369,7 +371,15 @@ export class CalendarComponent implements OnInit {
           originalDate: originalTask.originalDate,
           eventType: originalTask.eventType
         };
-        this.tasks.push(recurringTask);
+        
+        this.todoApiService.createTask(recurringTask).subscribe({
+          next: (createdTask) => {
+            this.tasks.push(createdTask);
+          },
+          error: (error) => {
+            console.error('Error creating recurring task:', error);
+          }
+        });
       }
       
       // Move to next occurrence
@@ -402,7 +412,15 @@ export class CalendarComponent implements OnInit {
         originalDate: originalTask.originalDate,
         eventType: originalTask.eventType
       };
-      this.tasks.push(nextTask);
+      
+      this.todoApiService.createTask(nextTask).subscribe({
+        next: (createdTask) => {
+          this.tasks.push(createdTask);
+        },
+        error: (error) => {
+          console.error('Error creating next recurring task:', error);
+        }
+      });
     }
   }
 
@@ -462,7 +480,6 @@ export class CalendarComponent implements OnInit {
       }
     });
     
-    this.saveTasks();
   }
 
   triggerNotificationCheck() {
@@ -470,35 +487,22 @@ export class CalendarComponent implements OnInit {
     window.dispatchEvent(new CustomEvent('taskUpdated'));
   }
 
-  private saveTasks() {
-    // Keep localStorage as backup
-    localStorage.setItem('calendar-tasks', JSON.stringify(this.tasks));
-  }
 
   private loadTasks() {
     this.isLoading = true;
     this.todoApiService.getAllTasks().subscribe({
       next: (tasks) => {
-        this.tasks = tasks;
+        this.tasks = tasks.map(task => ({
+          ...task,
+          date: new Date(task.date),
+          originalDate: task.originalDate ? new Date(task.originalDate) : undefined
+        }));
         this.isLoading = false;
       },
       error: (error) => {
         console.error('Error loading tasks:', error);
-        // Fallback to localStorage if API fails
-        this.loadTasksFromLocalStorage();
         this.isLoading = false;
       }
     });
-  }
-
-  private loadTasksFromLocalStorage() {
-    const saved = localStorage.getItem('calendar-tasks');
-    if (saved) {
-      this.tasks = JSON.parse(saved).map((task: any) => ({
-        ...task,
-        date: new Date(task.date),
-        originalDate: task.originalDate ? new Date(task.originalDate) : undefined
-      }));
-    }
   }
 }

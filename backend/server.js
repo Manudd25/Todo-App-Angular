@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initializeDatabase, db } from './config/database.js';
+import { initializeDatabase, closeDatabase } from './config/database.js';
 import authRoutes from './routes/auth.js';
 import taskRoutes from './routes/tasks.js';
 import healthRoutes from './routes/health.js';
@@ -9,16 +9,17 @@ import healthRoutes from './routes/health.js';
 dotenv.config();
 
 const app = express();
+
 const PORT = process.env.PORT || 3003;
 
 // Middleware
 app.use(cors({
   origin: [
-    'http://localhost:4200', // Angular dev server (original)
-    'http://localhost:4201', // Angular dev server (new port)
+    'http://localhost:4200', 
+    'http://localhost:4201', 
     'http://localhost:3000',
-    'https://todolistangular1.netlify.app', // Netlify frontend
-    'https://todolist-angular-a7f8acezg7dgd8gk.westeurope-01.azurewebsites.net' // Azure backend (for testing)
+    'https://onlinecalendar.z6.web.core.windows.net', // Azure Static Web App frontend
+    'https://todolistangular1.netlify.app' // Netlify frontend (backup)
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -26,6 +27,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.options('*', cors());
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -39,7 +41,7 @@ const startServer = async () => {
     
     app.listen(PORT, () => {
       console.log(`✅ Todo API server is running on port ${PORT}`);
-      console.log(`📊 Database: ${db.filename || 'todos.db'}`);
+      console.log(`📊 Database: SQLite`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -48,16 +50,15 @@ const startServer = async () => {
 };
 
 // Graceful shutdown
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   console.log('\n🛑 Shutting down server...');
-  db.close((err) => {
-    if (err) {
-      console.error('Error closing database:', err);
-    } else {
-      console.log('✅ Database connection closed');
-    }
-    process.exit(0);
-  });
+  try {
+    await closeDatabase();
+    console.log('✅ Database connection closed');
+  } catch (err) {
+    console.error('Error closing database:', err);
+  }
+  process.exit(0);
 });
 
 startServer();

@@ -1,19 +1,4 @@
 <div class="calendar-layout">
-  <!-- Authentication Check -->
-  <div *ngIf="!isUserAuthenticated()" class="auth-required-message">
-    <div class="auth-message-card">
-      <mat-icon class="auth-icon">lock</mat-icon>
-      <h2>Authentication Required</h2>
-      <p>You need to be logged in to access the calendar and manage tasks.</p>
-      <div class="auth-actions">
-        <a routerLink="/sign-in" class="btn btn-primary">Sign In</a>
-        <a routerLink="/sign-up" class="btn btn-secondary">Sign Up</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Calendar Content (only show when authenticated) -->
-  <div *ngIf="isUserAuthenticated()">
     <!-- Sidebar -->
     <div class="sidebar" *ngIf="selectedDate">
     <div class="sidebar-header">
@@ -255,5 +240,4 @@
       </div>
     </div>
   </div>
-  </div> <!-- End of authenticated content -->
 </div>

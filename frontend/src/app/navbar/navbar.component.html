@@ -1,6 +1,6 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <h1 (click)="goToCalendar()" class="clickable-title">📅 Todo Calendar</h1>
+    <h1 class="navbar-title">📅 Todo Calendar</h1>
   </div>
   
   <div class="navbar-actions">
@@ -77,28 +77,6 @@
         </div>
       </div>
     </div>
-    
-    <!-- User Profile -->
-    <div class="user-profile" *ngIf="isAuthenticated; else authButtons">
-      <div class="user-info">
-        <span class="user-name">{{ currentUser?.name }}</span>
-        <button class="logout-btn" (click)="signOut()" title="Sign Out">
-          <mat-icon>logout</mat-icon>
-        </button>
-      </div>
-    </div>
-    
-    <!-- Authentication Buttons -->
-    <ng-template #authButtons>
-      <div class="auth-buttons">
-        <a routerLink="/sign-in" class="auth-btn sign-in-btn" title="Sign In">
-          <mat-icon>login</mat-icon>
-        </a>
-        <a routerLink="/sign-up" class="auth-btn sign-up-btn" title="Sign Up">
-          <mat-icon>person_add</mat-icon>
-        </a>
-      </div>
-    </ng-template>
   </div>
 </nav>
 
