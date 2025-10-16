@@ -6,13 +6,13 @@
 }
 
 .app-content {
-  padding: 20px 20px 20px 20px;
+  padding: 0;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .app-container {
-    padding: 10px;
+    padding: 0;
   }
   
   .app-header {

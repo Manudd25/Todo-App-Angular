@@ -26,6 +26,6 @@ You can try the live demo here: [TodoApp](https://todolistangular1.netlify.app/)
 
 - **Framework**: Angular  
 - **TypeScript**  
-- **HTML / CSS / SCSS**  
+- **HTML / CSS 
 - Database: SQLite. 
 

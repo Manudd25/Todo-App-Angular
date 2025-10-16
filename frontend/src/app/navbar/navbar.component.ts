@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService, User } from '../services/auth.service';
 
 export interface Notification {
   id: string;
@@ -14,7 +16,7 @@ export interface Notification {
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, RouterModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -22,8 +24,22 @@ export class NavbarComponent implements OnInit {
   showNotifications = false;
   notifications: Notification[] = [];
   unreadCount = 0;
+  isAuthenticated = false;
+  currentUser: User | null = null;
+
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
+    // Check authentication status
+    this.isAuthenticated = this.authService.isAuthenticated();
+    this.currentUser = this.authService.getCurrentUser();
+    
+    // Subscribe to auth state changes
+    this.authService.currentUser$.subscribe(user => {
+      this.isAuthenticated = !!user;
+      this.currentUser = user;
+    });
+
     this.loadNotifications();
     this.clearOldNotifications();
     this.checkForDueTasks();
@@ -40,6 +56,15 @@ export class NavbarComponent implements OnInit {
         this.showNotifications = false;
       }
     });
+  }
+
+  signOut() {
+    this.authService.signOut();
+    this.router.navigate(['/']);
+  }
+
+  goToCalendar() {
+    this.router.navigate(['/calendar']);
   }
 
   toggleNotifications() {

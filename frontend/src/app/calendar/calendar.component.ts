@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { TodoApiService } from '../services/todo-api.service';
+import { AuthService } from '../services/auth.service';
 
 export interface Task {
   id: string;
@@ -46,7 +47,10 @@ export class CalendarComponent implements OnInit {
   editTaskText: string = '';
   selectedEventType: 'task' | 'birthday' | 'vacation' | 'timeoff' | 'family' | 'date' | 'social' | 'holiday' = 'task';
 
-  constructor(private todoApiService: TodoApiService) {}
+  constructor(
+    private todoApiService: TodoApiService,
+    private authService: AuthService
+  ) {}
   
   // Event types with colors and icons
   eventTypes = {
@@ -67,9 +71,19 @@ export class CalendarComponent implements OnInit {
   ];
 
   ngOnInit() {
+    // Check if user is authenticated
+    if (!this.authService.isAuthenticated()) {
+      console.warn('User not authenticated, redirecting to login');
+      return;
+    }
+    
     this.generateCalendar();
     this.loadTasks();
     this.generateMissingRecurringTasks();
+  }
+
+  isUserAuthenticated(): boolean {
+    return this.authService.isAuthenticated();
   }
 
   generateCalendar() {
@@ -93,6 +107,11 @@ export class CalendarComponent implements OnInit {
   }
 
   addTask() {
+    if (!this.isUserAuthenticated()) {
+      console.warn('User must be logged in to add tasks');
+      return;
+    }
+    
     if (this.newTask.trim() && this.selectedDate) {
       const eventTypeConfig = this.eventTypes[this.selectedEventType];
       const task: Task = {
@@ -138,6 +157,11 @@ export class CalendarComponent implements OnInit {
   }
 
   toggleTask(task: Task) {
+    if (!this.isUserAuthenticated()) {
+      console.warn('User must be logged in to toggle tasks');
+      return;
+    }
+    
     task.completed = !task.completed;
     
     // If it's a recurring task and was just completed, create the next occurrence
@@ -152,6 +176,11 @@ export class CalendarComponent implements OnInit {
   }
 
   deleteTask(taskId: string) {
+    if (!this.isUserAuthenticated()) {
+      console.warn('User must be logged in to delete tasks');
+      return;
+    }
+    
     const task = this.tasks.find(t => t.id === taskId);
     
     if (task && task.isRecurring) {
@@ -181,11 +210,21 @@ export class CalendarComponent implements OnInit {
   }
 
   editTask(task: Task) {
+    if (!this.isUserAuthenticated()) {
+      console.warn('User must be logged in to edit tasks');
+      return;
+    }
+    
     this.editingTask = task;
     this.editTaskText = task.text;
   }
 
   saveEdit() {
+    if (!this.isUserAuthenticated()) {
+      console.warn('User must be logged in to save task edits');
+      return;
+    }
+    
     if (this.editingTask && this.editTaskText.trim()) {
       this.editingTask.text = this.editTaskText.trim();
       this.saveTasks();

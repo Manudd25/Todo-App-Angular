@@ -1,0 +1,72 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <h2>Sign In</h2>
+    <form (ngSubmit)="onSubmit()" #signInForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          [(ngModel)]="credentials.email" 
+          required 
+          email
+          #email="ngModel"
+          class="form-control"
+          [class.error]="email.invalid && email.touched"
+        >
+        <div *ngIf="email.invalid && email.touched" class="error-message">
+          <span *ngIf="email.errors?.['required']">Email is required</span>
+          <span *ngIf="email.errors?.['email']">Please enter a valid email</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-input-container">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            id="password" 
+            name="password" 
+            [(ngModel)]="credentials.password" 
+            required 
+            minlength="6"
+            #password="ngModel"
+            class="form-control password-input"
+            [class.error]="password.invalid && password.touched"
+          >
+          <button 
+            type="button" 
+            class="password-toggle-btn"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+        <div *ngIf="password.invalid && password.touched" class="error-message">
+          <span *ngIf="password.errors?.['required']">Password is required</span>
+          <span *ngIf="password.errors?.['minlength']">Password must be at least 6 characters</span>
+        </div>
+      </div>
+
+      <div *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="signInForm.invalid || isLoading"
+      >
+        <span *ngIf="isLoading">Signing In...</span>
+        <span *ngIf="!isLoading">Sign In</span>
+      </button>
+
+      <div class="auth-links">
+        <p><a routerLink="/forgot-password" class="forgot-password-link">Forgot Password?</a></p>
+        <p>Don't have an account? <a routerLink="/sign-up">Sign Up</a></p>
+      </div>
+    </form>
+  </div>
+</div>
