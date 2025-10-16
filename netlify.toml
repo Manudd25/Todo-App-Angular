@@ -1,6 +1,6 @@
 [build]
   base = "frontend"
-  publish = "dist/todo-app/browser"
+  publish = "dist"
   command = "npm install && ng build --configuration production"
 
 [build.environment]
