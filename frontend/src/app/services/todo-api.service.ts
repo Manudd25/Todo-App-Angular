@@ -7,7 +7,7 @@ import { Task } from '../calendar/calendar.component';
   providedIn: 'root'
 })
 export class TodoApiService {
-  private apiUrl = 'http://localhost:3003/api';
+  private apiUrl = 'https://onlinecalendar-bpc5e2fcgvgzgneq.westeurope-01.azurewebsites.net/api';
 
   constructor(private http: HttpClient) { }
 
