@@ -122,3 +122,5 @@ Thumbs.db
 *.zip
 backend-deployment.zip
 frontend-deployment.zip
+# Local Netlify folder
+.netlify

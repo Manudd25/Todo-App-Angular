@@ -1,17 +1,13 @@
 import express from 'express';
 import { Task } from '../models/Task.js';
-import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
-
-// All task routes require authentication
-router.use(authenticateToken);
 
 // Get all tasks
 router.get('/', async (req, res) => {
   try {
     const { date, eventType } = req.query;
-    const tasks = await Task.findByUserId(req.user.id, { date, eventType });
+    const tasks = await Task.findAll({ date, eventType });
     res.json(tasks);
   } catch (error) {
     console.error('Error fetching tasks:', error);
@@ -23,7 +19,7 @@ router.get('/', async (req, res) => {
 router.get('/date/:date', async (req, res) => {
   try {
     const { date } = req.params;
-    const tasks = await Task.findByUserIdAndDate(req.user.id, date);
+    const tasks = await Task.findByDate(date);
     res.json(tasks);
   } catch (error) {
     console.error('Error fetching tasks for date:', error);
@@ -38,7 +34,6 @@ router.post('/', async (req, res) => {
 
     const result = await Task.create({
       id,
-      userId: req.user.id,
       text,
       completed,
       date,
@@ -62,7 +57,7 @@ router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { text, completed, date, color, isRecurring, recurringDays, originalDate, eventType } = req.body;
 
-    const result = await Task.update(id, req.user.id, {
+    const result = await Task.update(id, {
       text,
       completed,
       date,
@@ -87,7 +82,7 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Task.delete(id, req.user.id);
+    const result = await Task.delete(id);
     res.json(result);
   } catch (error) {
     console.error('Error deleting task:', error);
@@ -102,7 +97,7 @@ router.delete('/:id', async (req, res) => {
 router.delete('/recurring/:text/:originalDate', async (req, res) => {
   try {
     const { text, originalDate } = req.params;
-    const result = await Task.deleteRecurring(text, originalDate, req.user.id);
+    const result = await Task.deleteRecurring(text, originalDate);
     res.json(result);
   } catch (error) {
     console.error('Error deleting recurring tasks:', error);
