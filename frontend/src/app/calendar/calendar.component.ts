@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -47,7 +47,8 @@ export class CalendarComponent implements OnInit {
   selectedEventType: 'task' | 'birthday' | 'vacation' | 'timeoff' | 'family' | 'date' | 'social' | 'holiday' = 'task';
 
   constructor(
-    private todoApiService: TodoApiService
+    private todoApiService: TodoApiService,
+    private cdr: ChangeDetectorRef
   ) {}
   
   // Event types with colors and icons
@@ -119,10 +120,11 @@ export class CalendarComponent implements OnInit {
       // Save to API
       this.todoApiService.createTask(task).subscribe({
         next: (createdTask) => {
-          // Update local array with the created task
+          // Update local array with the created task, preserving the original task object
           const index = this.tasks.findIndex(t => t.id === task.id);
           if (index !== -1) {
-            this.tasks[index] = createdTask;
+            // Update properties instead of replacing the entire object
+            Object.assign(this.tasks[index], createdTask);
           }
           
           this.newTask = '';
@@ -130,13 +132,21 @@ export class CalendarComponent implements OnInit {
           this.recurringDays = 14;
           this.selectedEventType = 'task';
           
+          // Trigger change detection to ensure drag functionality is available
+          this.cdr.detectChanges();
+          
           // Trigger notification check
           this.triggerNotificationCheck();
         },
         error: (error) => {
           console.error('Error creating task:', error);
+          // Remove the task from local array if API call failed
+          this.tasks = this.tasks.filter(t => t.id !== task.id);
         }
       });
+      
+      // Trigger change detection immediately for UI responsiveness
+      this.cdr.detectChanges();
       
       // Trigger notification check
       this.triggerNotificationCheck();
@@ -325,7 +335,21 @@ export class CalendarComponent implements OnInit {
     event.preventDefault();
     
     if (this.draggedTask) {
+      const oldDate = new Date(this.draggedTask.date);
       this.draggedTask.date = new Date(targetDate);
+      
+      // Save the change to the backend
+      this.todoApiService.updateTask(this.draggedTask).subscribe({
+        next: () => {
+          console.log('Task moved successfully');
+        },
+        error: (error) => {
+          console.error('Error moving task:', error);
+          // Revert the change on error
+          this.draggedTask!.date = oldDate;
+        }
+      });
+      
       this.draggedTask = null;
     }
   }

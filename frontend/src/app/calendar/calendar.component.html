@@ -143,8 +143,7 @@
             <div class="task-actions">
               <button 
                 class="edit-btn" 
-                (click)="editTask(task)"
-                (click)="$event.stopPropagation()"
+                (click)="editTask(task); $event.stopPropagation()"
                 title="Edit task"
               >
                 <mat-icon>edit</mat-icon>
@@ -154,8 +153,7 @@
               </span>
               <button 
                 class="delete-btn" 
-                (click)="deleteTask(task.id)"
-                (click)="$event.stopPropagation()"
+                (click)="deleteTask(task.id); $event.stopPropagation()"
                 title="Delete task"
               >
                 <mat-icon>delete</mat-icon>

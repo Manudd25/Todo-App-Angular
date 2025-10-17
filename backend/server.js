@@ -11,6 +11,11 @@ const app = express();
 
 const PORT = process.env.PORT || 8080;
 
+// Set NODE_ENV to production for Azure
+if (process.env.NODE_ENV !== 'production') {
+  process.env.NODE_ENV = 'production';
+}
+
 // Middleware
 app.use(cors({
   origin: [
